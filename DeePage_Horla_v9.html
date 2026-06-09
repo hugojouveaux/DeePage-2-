@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DeePage — Le Horla</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d0b08;--bg2:#151210;--bg3:#1e1a15;
+  --text:#e8e0d0;--text2:#a09080;
+  --accent:#c4956a;--accent2:#8b5e3c;
+  --border:#2a2420;
+}
+body{background:var(--bg);color:var(--text);font-family:'EB Garamond',serif;min-height:100vh;overflow-x:hidden}
+
+/* TOP BAR */
+.top-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-family:'Inter',sans-serif;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.logo{font-size:18px;color:var(--accent);letter-spacing:3px;font-family:'EB Garamond',serif;cursor:pointer;user-select:none;flex-shrink:0}
+.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lang-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Inter',sans-serif;transition:all 0.15s;font-weight:500}
+.lang-btn.active{border-color:var(--accent);color:var(--accent)}
+#feedback-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Inter',sans-serif;transition:all 0.15s}
+#feedback-btn:hover{border-color:var(--accent);color:var(--accent)}
+#mute-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:16px;font-family:Inter,sans-serif;transition:all 0.15s;line-height:1;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center}
+#mute-btn:hover{border-color:var(--accent);color:var(--accent)}
+#mute-btn.muted{border-color:#555;color:#555}
+#volume-ctrl{display:flex;align-items:center;gap:6px}
+#volume-slider{-webkit-appearance:none;appearance:none;width:68px;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+#volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent2);cursor:pointer}
+#volume-slider::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent2);cursor:pointer;border:none}
+@media(max-width:680px){#volume-slider{width:50px}}
+#cover-screen{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:#0d0b08;z-index:500;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.cover-img-wrap{
+  position:relative;width:280px;max-width:80vw;
+}
+.cover-img{
+  width:100%;border-radius:4px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px #2a2420;
+  display:block;
+}
+.cover-overlay{
+  position:absolute;inset:0;border-radius:4px;
+  background:linear-gradient(to bottom, transparent 60%, rgba(13,11,8,0.95));
+}
+.cover-title{
+  margin-top:28px;font-family:'EB Garamond',serif;
+  font-size:28px;color:#e8e0d0;letter-spacing:3px;text-align:center;
+}
+.cover-author{
+  font-family:'Inter',sans-serif;font-size:13px;
+  color:#a09080;letter-spacing:4px;text-transform:uppercase;
+  margin-top:8px;text-align:center;
+}
+.cover-hint{
+  margin-top:40px;font-family:'Inter',sans-serif;
+  font-size:12px;color:#5a4a3a;letter-spacing:2px;
+  text-transform:uppercase;animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:0.4}50%{opacity:1}}
+.cover-logo{
+  position:absolute;top:24px;left:0;right:0;
+  text-align:center;font-family:'EB Garamond',serif;
+  font-size:14px;color:#5a4a3a;letter-spacing:4px;
+}
+
+/* Flèche chapitre 1 */
+.ch1-arrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Inter',sans-serif;font-size:11px;color:var(--accent);
+  animation:arrow-pulse 1.5s infinite;margin-left:4px;
+}
+@keyframes arrow-pulse{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(3px);opacity:0.6}}
+
+
+.now-playing{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);max-width:160px}
+.now-playing-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;display:none;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.emotion-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:12px;font-family:'Inter',sans-serif;display:none;white-space:nowrap}
+.book-subtitle{font-size:10px;color:var(--text2);letter-spacing:1px;display:none}
+
+/* PROGRESS */
+.progress-bar{height:2px;background:var(--border);position:sticky;top:49px;z-index:49}
+.progress-fill{height:2px;background:var(--accent2);transition:width 0.5s ease}
+
+/* LAYOUT */
+#reader-screen{display:flex;flex-direction:column;min-height:100vh}
+.reader-body{flex:1;display:flex}
+
+/* SIDEBAR — desktop */
+.sidebar{width:185px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar-title{font-family:'Inter',sans-serif;font-size:10px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.section-btn{background:none;border:none;padding:8px 10px;border-radius:6px;text-align:left;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:7px;transition:all 0.15s;width:100%}
+.section-btn:hover{background:var(--bg3);color:var(--text)}
+.section-btn.active{background:var(--bg3);color:var(--accent)}
+.section-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.section-pages{font-size:10px;color:var(--text2);margin-left:auto;white-space:nowrap}
+
+/* MOBILE TABS */
+.mobile-tabs{display:none;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.mobile-tabs::-webkit-scrollbar{display:none}
+.mobile-tabs-inner{display:flex;padding:8px 12px;gap:6px;min-width:max-content}
+.tab-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:5px}
+.tab-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent)15}
+.tab-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* TEXT AREA */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.text-area{padding:44px 56px;max-width:660px;margin:0 auto}
+.section-label{font-size:11px;color:var(--text2);font-family:'Inter',sans-serif;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.page-number{font-family:'Inter',sans-serif;font-size:11px;color:var(--text2);letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.page-text{font-size:19px;line-height:1.95;color:var(--text)}
+
+/* NAV */
+.nav-controls{display:flex;align-items:center;justify-content:space-between;padding:16px 56px;border-top:1px solid var(--border);background:var(--bg2);position:sticky;bottom:0}
+.nav-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;transition:all 0.15s;min-width:44px;min-height:44px}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn:disabled{opacity:0.25;cursor:not-allowed}
+.page-indicator{font-size:12px;color:var(--text2);font-family:'Inter',sans-serif}
+
+/* OVERLAY */
+.audio-transition{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0);pointer-events:none;transition:background 1.5s ease;z-index:100}
+.audio-transition.flash{background:rgba(0,0,0,0.3)}
+
+/* MODAL BASE */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:200;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:560px;margin:auto}
+.modal-title{font-size:22px;color:var(--accent);margin-bottom:6px;font-weight:400}
+.modal-sub{font-size:13px;color:var(--text2);font-family:'Inter',sans-serif;margin-bottom:24px;line-height:1.6}
+.q-block{margin-bottom:20px}
+.q-label{font-family:'Inter',sans-serif;font-size:13px;color:var(--text);margin-bottom:8px;display:block;line-height:1.5}
+.q-hint{font-family:'Inter',sans-serif;font-size:11px;color:var(--text2);margin-top:4px}
+.q-stars{display:flex;gap:4px}
+.star-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#2e2820;transition:color 0.1s;line-height:1;padding:4px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.star-btn.lit{color:var(--accent)}
+textarea.q-input,input.q-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 14px;font-family:'EB Garamond',serif;font-size:16px;outline:none;line-height:1.6}
+textarea.q-input{resize:vertical;min-height:80px}
+input.q-input{height:44px;font-family:'Inter',sans-serif;font-size:14px}
+textarea.q-input:focus,input.q-input:focus{border-color:var(--accent2)}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.modal-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.submit-btn{background:var(--accent2);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;transition:background 0.2s;min-height:44px}
+.submit-btn:hover{background:var(--accent)}
+.cancel-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:12px 18px;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;min-height:44px}
+
+/* RESULTS */
+.pwd-box{display:flex;flex-direction:column;align-items:center;gap:14px;margin:auto;width:100%;max-width:320px;text-align:center}
+.pwd-title{font-size:22px;color:var(--accent);font-family:'EB Garamond',serif}
+.pwd-sub{font-size:13px;color:var(--text2);font-family:'Inter',sans-serif}
+.pwd-input{background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 20px;font-family:'Inter',sans-serif;font-size:15px;width:100%;text-align:center;outline:none;min-height:44px}
+.pwd-input:focus{border-color:var(--accent2)}
+.pwd-btn{background:var(--accent2);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;width:100%;min-height:44px}
+.pwd-error{font-family:'Inter',sans-serif;font-size:13px;color:#e24b4a;display:none}
+.results-content{display:none;width:100%;max-width:720px}
+.results-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+.results-title{font-size:24px;color:var(--accent);font-weight:400}
+.results-count{font-family:'Inter',sans-serif;font-size:13px;color:var(--text2);margin-top:4px}
+.close-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;white-space:nowrap;min-height:44px}
+.result-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.result-meta{font-family:'Inter',sans-serif;font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.result-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);gap:10px}
+.result-row:last-child{border-bottom:none}
+.result-q{font-family:'Inter',sans-serif;font-size:12px;color:var(--text2);flex:1;min-width:100px}
+.result-a{font-size:13px;color:var(--text);text-align:right;max-width:300px;word-break:break-word;line-height:1.5}
+.stars-display{color:var(--accent)}
+.no-feedback{font-family:'Inter',sans-serif;font-size:14px;color:var(--text2);text-align:center;padding:40px}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 680px) {
+  .sidebar{display:none}
+  .mobile-tabs{display:block}
+  .book-subtitle{display:none}
+  .now-playing{max-width:120px;font-size:10px}
+  .text-area{padding:28px 20px}
+  .page-text{font-size:17px;line-height:1.85}
+  .nav-controls{padding:12px 16px}
+  .nav-btn{padding:8px 14px;font-size:12px}
+  .top-bar{padding:8px 12px}
+  .logo{font-size:16px}
+  .modal-card{padding:22px 16px;border-radius:12px}
+  .modal-title{font-size:19px}
+  .star-btn{font-size:26px;min-width:40px}
+  .results-header{flex-direction:column}
+}
+@media (max-width: 400px) {
+  .text-area{padding:20px 16px}
+  .page-text{font-size:16px}
+  .top-right{gap:5px}
+  .lang-btn{padding:4px 8px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+
+<div id="cover-screen" onclick="closeCover()">
+  <div class="cover-logo">DeePage</div>
+  <div class="cover-img-wrap">
+    <img class="cover-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Le_Horla_1887.jpg/400px-Le_Horla_1887.jpg" 
+         alt="Le Horla — couverture originale 1887"
+         onerror="this.style.display='none';document.getElementById('cover-fallback').style.display='flex'">
+    <div class="cover-overlay"></div>
+    <div id="cover-fallback" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#151210;border-radius:4px;flex-direction:column;gap:12px">
+      <div style="font-size:60px">📖</div>
+    </div>
+  </div>
+  <div class="cover-title">Le Horla</div>
+  <div class="cover-author">Guy de Maupassant · 1887</div>
+  <div class="cover-hint">Appuyer pour commencer</div>
+</div>
+
+<div class="audio-transition" id="transition-overlay"></div>
+
+<div id="reader-screen">
+  <div class="top-bar">
+    <div class="logo" id="logo-btn">DeePage</div>
+    <div class="now-playing">
+      <div class="now-playing-dot" id="playing-dot"></div>
+      <span id="now-playing-text">—</span>
+      <span class="emotion-badge" id="emotion-badge"></span>
+    </div>
+    <div class="top-right">
+      <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      <div id="volume-ctrl"><input type="range" id="volume-slider" min="0" max="100" value="65"></div>
+      <button id="mute-btn" title="Espace pour couper/relancer la musique">🔊</button>
+      <button id="feedback-btn"></button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <!-- Mobile tabs -->
+  <div class="mobile-tabs"><div class="mobile-tabs-inner" id="mobile-tabs-inner"></div></div>
+
+  <div class="reader-body">
+    <div class="sidebar">
+      <div class="sidebar-title" id="sidebar-title-text">Ambiances</div>
+      <div id="sidebar-sections"></div>
+    </div>
+    <div class="scroll-area" id="scroll-area">
+      <div class="text-area" id="text-area"></div>
+      <div class="nav-controls">
+        <button class="nav-btn" id="prev-btn">←</button>
+        <span class="page-indicator" id="page-indicator"></span>
+        <button class="nav-btn" id="next-btn">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="feedback-modal">
+  <div class="modal-card">
+    <div class="modal-title" id="fb-title">Feedback</div>
+    <div class="modal-sub" id="fb-sub">Tes réponses sont privées — seul Hugo peut les consulter.</div>
+    <div class="q-block">
+      <label class="q-label" id="fb-q0">Ton prénom (optionnel)</label>
+      <input class="q-input" type="text" id="q-name" placeholder="Ex : Marie">
+    </div>
+    <div class="divider"></div>
+    <div class="q-block"><label class="q-label" id="fb-q1"></label><div class="q-stars" id="stars-1"></div><div class="q-hint" id="fb-h1"></div></div>
+    <div class="q-block"><label class="q-label" id="fb-q2"></label><div class="q-stars" id="stars-2"></div></div>
+    <div class="q-block"><label class="q-label" id="fb-q3"></label><div class="q-stars" id="stars-3"></div><div class="q-hint" id="fb-h3"></div></div>
+    <div class="q-block"><label class="q-label" id="fb-q4"></label><div class="q-stars" id="stars-4"></div></div>
+    <div class="q-block"><label class="q-label" id="fb-q5"></label><div class="q-stars" id="stars-5"></div><div class="q-hint" id="fb-h5"></div></div>
+    <div class="divider"></div>
+    <div class="q-block"><label class="q-label" id="fb-q6"></label><textarea class="q-input" id="q-text1"></textarea></div>
+    <div class="q-block"><label class="q-label" id="fb-q7"></label><textarea class="q-input" id="q-text2"></textarea></div>
+    <div class="q-block"><label class="q-label" id="fb-q8"></label><textarea class="q-input" id="q-text3"></textarea></div>
+    <div class="divider"></div>
+    <div class="q-block"><label class="q-label" id="fb-q9"></label><div class="q-stars" id="stars-6"></div><div class="q-hint" id="fb-h9"></div></div>
+    <div class="q-block"><label class="q-label" id="fb-q10"></label><div class="q-stars" id="stars-7"></div></div>
+    <div class="modal-actions">
+      <button class="submit-btn" id="submit-feedback"></button>
+      <button class="cancel-btn" id="cancel-feedback"></button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS MODAL -->
+<div class="modal-overlay" id="results-modal">
+  <div class="pwd-box" id="pwd-box">
+    <div class="pwd-title" id="res-title">Résultats privés</div>
+    <div class="pwd-sub" id="res-sub">Accès réservé — Hugo uniquement</div>
+    <input class="pwd-input" type="password" id="pwd-input" placeholder="Mot de passe">
+    <div class="pwd-error" id="pwd-error"></div>
+    <button class="pwd-btn" id="pwd-btn"></button>
+    <button class="cancel-btn" style="width:100%" id="close-results-btn"></button>
+  </div>
+  <div class="results-content" id="results-content">
+    <div class="results-header">
+      <div><div class="results-title">Feedbacks DeePage</div><div class="results-count" id="results-count"></div></div>
+      <button class="close-btn" id="close-results-btn2"></button>
+    </div>
+    <div id="results-list"></div>
+  </div>
+</div>
+
+<script>
+
+
+window._ch1Clicked = false;
+
+function closeCover() {
+  var cover = document.getElementById('cover-screen');
+  cover.style.transition = 'opacity 1s ease';
+  cover.style.opacity = '0';
+  setTimeout(function() { cover.style.display = 'none'; }, 1000);
+  // Start audio on first interaction
+  if (!started) { started = true; playSection(0); }
+}
+
+// ─── GLOBAL VARS ────────────────────────────────────────
+let masterVolume = 0.65;
+let endTimer = null;
+let endFadeTimer = null;
+
+function setMasterVolume(v) {
+  masterVolume = v;
+  if (typeof currentAudio !== 'undefined' && currentAudio && !isMuted) {
+    currentAudio.volume = v;
+  }
+}
+
+function clearEndTimers() {
+  if (endTimer) { clearTimeout(endTimer); endTimer = null; }
+  if (endFadeTimer) { clearInterval(endFadeTimer); endFadeTimer = null; }
+}
+
+function startEndFade() {
+  clearEndTimers();
+  endTimer = setTimeout(function() {
+    if (!currentAudio || isMuted) return;
+    var startVol = currentAudio.volume;
+    var steps = 150;
+    var s = 0;
+    endFadeTimer = setInterval(function() {
+      s++;
+      if (currentAudio) currentAudio.volume = Math.max(0, startVol * (1 - s / steps));
+      if (s >= steps) { clearInterval(endFadeTimer); endFadeTimer = null; }
+    }, 100);
+  }, 10000);
+}
+
+const ADMIN_PASSWORD = 'hugo2024';
+let currentLang = 'fr';
+let currentSectionIdx = 0;
+let currentPageIdx = 0;
+let audioPlayers = {};
+let currentAudio = null;
+let started = false;
+let ratings = {1:0,2:0,3:0,4:0,5:0,6:0,7:0};
+let allFeedbacks = JSON.parse(localStorage.getItem('deepage_feedbacks') || '[]');
+
+// ─── TRANSLATIONS ────────────────────────────────────────
+const T = {
+  fr: {
+    bookTitle: 'LE HORLA · GUY DE MAUPASSANT',
+    sidebarTitle: 'Ambiances',
+    feedbackBtn: 'Feedback',
+    page: 'Page',
+    of: '/',
+    clickToStart: 'Cliquez pour démarrer',
+    fbTitle: 'Feedback de lecture',
+    fbSub: 'Tes réponses sont privées — seul Hugo peut les consulter. Réponds honnêtement.',
+    fbQ0: 'Ton prénom (optionnel)',
+    fbQ1: '1 — L\'immersion globale était-elle au rendez-vous ?',
+    fbH1: '1 = nulle · 5 = totale',
+    fbQ2: '2 — La musique correspondait-elle aux émotions du texte ?',
+    fbQ3: '3 — La musique t\'a-t-elle gêné(e) ou distrait(e) ?',
+    fbH3: '1 = très souvent · 5 = jamais',
+    fbQ4: '4 — Les transitions entre ambiances étaient-elles bien placées ?',
+    fbQ5: '5 — Le volume de la musique était-il adapté ?',
+    fbH5: '1 = inadapté · 5 = parfait',
+    fbQ6: '6 — Un moment où la musique t\'a particulièrement marqué(e) ?',
+    fbQ6ph: 'Décris le moment, la page, l\'émotion ressentie...',
+    fbQ7: '7 — Un moment où la musique ne collait pas ?',
+    fbQ7ph: 'Ex : page 5, la musique était trop intense...',
+    fbQ8: '8 — Tes suggestions pour améliorer l\'expérience ?',
+    fbQ8ph: 'Tout commentaire est bienvenu...',
+    fbQ9: '9 — Recommanderais-tu DeePage à quelqu\'un qui aime lire ?',
+    fbH9: '1 = non · 5 = absolument',
+    fbQ10: '10 — Note finale pour le concept DeePage',
+    fbSubmit: 'Envoyer mon feedback',
+    fbCancel: 'Annuler',
+    fbThanks: 'Merci ! Ton feedback a bien été enregistré.',
+    resTitle: 'Résultats privés',
+    resSub: 'Accès réservé — Hugo uniquement',
+    resPwdError: 'Mot de passe incorrect',
+    resAccess: 'Accéder',
+    resCancel: 'Annuler',
+    resClose: 'Fermer',
+    resReceived: 'feedback reçu',
+    resReceivedP: 'feedbacks reçus',
+    resNone: 'Aucun feedback pour l\'instant.',
+    rLabels: ['Immersion globale','Musique correspondante','Non gêné(e)','Transitions','Volume','Recommandation','Note finale','Moment fort','Moment négatif','Suggestions'],
+    sections: [
+      {name:'Chapitre 1', emotion:'PAISIBLE'},
+      {name:'Chapitre 2', emotion:'TROUBLE'},
+      {name:'Chapitre 3', emotion:'MYSTÉRIEUX'},
+      {name:'Chapitre 4', emotion:'TERREUR'},
+    ],
+    pages: [
+      // Section 0
+      [
+        {n:1, text:`8 mai. — Quelle journée admirable ! J'ai passé toute la matinée étendu sur l'herbe, devant ma maison, sous l'énorme platane qui la couvre, l'abrite et l'ombrage tout entière. J'aime ce pays, et j'aime y vivre parce que j'y ai mes racines, ces profondes et délicates racines qui attachent un homme à la terre où sont nés et morts ses aïeux, qui l'attachent à ce qu'on pense et à ce qu'on mange, aux usages comme aux nourritures, aux locutions locales, aux intonations des paysans, aux odeurs du sol, des villages et de l'air lui-même.`},
+        {n:2, text:`J'aime ma maison où j'ai grandi. Je vois de mes fenêtres la Seine qui coule, le long de mon jardin, derrière la route, presque chez moi, la grande et large Seine, qui va de Rouen au Havre, couverte de bateaux qui passent.\n\nA gauche, là-bas, Rouen, la vaste ville aux toits bleus, sous le peuple pointu des clochers gothiques. Ils sont innombrables, frêles ou larges, dominés par la flèche de fonte de la cathédrale, et pleins de cloches qui sonnent dans l'air bleu des belles matinées, jetant jusqu'à moi leur doux et lointain bourdonnement de fer, leur chant d'airain que la brise m'apporte, tantôt plus fort et tantôt plus assourdi, suivant qu'elle s'éveille ou s'assoupit.`},
+        {n:3, text:`Comme il faisait bon ce matin ! Vers onze heures, un long convoi de navires, traînés par un remorqueur, gros comme une mouche, et qui râlait de peine en vomissant une fumée épaisse, défila devant ma grille.\n\nAprès deux frégates anglaises, dont le pavillon rouge ondoyait sur le ciel, venait un superbe trois-mâts brésilien, tout blanc, admirablement propre et luisant. Je le saluai, je ne sais pourquoi, tant ce navire me fit plaisir à voir.`}
+      ],
+      // Section 1
+      [
+        {n:4, text:`12 mai. — J'ai un peu de fièvre depuis quelques jours ; je me sens souffrant, ou plutôt je me sens triste.\n\nD'où viennent ces influences mystérieuses qui changent en découragement notre bonheur et notre confiance en détresse ? On dirait que l'air, l'air invisible est plein d'inconnuissables Puissances, dont nous subissons les voisinages mystérieux. Je m'éveille plein de gaieté, avec des envies de chanter dans la gorge. — Pourquoi ? — Je descends le long de l'eau ; et soudain, après une courte promenade, je rentre désolé, comme si quelque malheur m'attendait chez moi.`},
+        {n:5, text:`16 mai. — Je suis malade, décidément ! Je me portais si bien le mois dernier ! J'ai la fièvre, une fièvre atroce, ou plutôt un énervement fiévreux, qui rend mon âme aussi souffrante que mon corps. J'ai sans cesse cette sensation horrible d'un danger menaçant, cette appréhension d'un malheur qui vient ou de la mort qui approche, ce pressentiment qui est sans doute l'atteinte d'un mal encore inconnu, germant dans le sang et dans la chair.\n\nIl se lève, je monte dans ma chambre. Je ferme ma porte à double tour — j'ai peur... de quoi ?... Je ne redoutais rien jusqu'ici... j'ouvre mes armoires, je regarde sous mon lit ; j'écoute... j'écoute... quoi ?`},
+        {n:6, text:`Est-ce étrange qu'un simple malaise, un trouble dans la circulation peut-être, l'irritation d'un filet nerveux, un peu de congestion, une toute petite perturbation dans le fonctionnement si imparfait et si délicat de notre machine vivante, puisse faire un mélancolique du plus joyeux des hommes, et un poltron du plus brave ?\n\nJe rentrai hier soir, après avoir marché toute la journée ; et, en passant devant ma fenêtre, j'aperçus dedans, dans la glace, mon visage... Je ne me reconnus pas.`},
+        {n:7, text:`25 mai. — Aucune crise, mais quelque chose de singulier s'est passé hier.\n\nJ'avais fermé toutes mes volets, tous mes rideaux, pour me trouver dans le noir absolu, et je voulais dormir enfin... Alors, à travers ces volets et ces rideaux épais, une lumière qui semblait venir de rien, une vague clarté passa sur moi, me frôla. Je me levai brusquement pour regarder et je ne trouvai rien. Toutes les ouvertures étaient bien closes. J'en fus troublé, et bientôt, je commençai à trembler sans raison, d'un froid qui me glaçait jusqu'aux os.`},
+        {n:8, text:`6 juin. — Je deviens fou. On a encore bu toute ma carafe cette nuit ; — ou plutôt, je l'ai bue moi-même sans le savoir.\n\nMais, est-ce moi ? Est-ce moi ? Qui serait-ce ? Qui ? Oh ! mon Dieu ! Je deviens fou ? Qui boira demain, si ce n'est moi ?\n\nJ'ai fait apporter une bouteille de bon vin de Bordeaux, une carafe de lait, du pain et des fraises. Je n'ai touché à rien.\n\nEt cependant on a bu l'eau et bu le lait ! On n'a pas touché ni au vin ni aux fraises.`}
+      ],
+      // Section 2
+      [
+        {n:9, text:`10 juin. — Je viens de faire des expériences surprenantes.\n\nJ'ai bouché la goulot de ma carafe avec un tampon de ouate et recouvert le goulot en verre d'une mousseline et je l'ai suspendue au-dessus de ma table.\n\nEt j'ai dormi jusqu'à sept heures du matin.\n\nOn avait bu l'eau de ma carafe ! Quelqu'un avait bu cette eau ! Qui ? Moi certes ; et pourtant je croyais bien ne l'avoir pas bue... et les plis de la mousseline n'avaient pas été défaits !`},
+        {n:10, text:`4 juillet. — Il est revenu, je l'ai senti, la nuit dernière. Mais je ne l'ai pas vu. Je dormais, et soudain je m'éveillai avec une terreur folle. Mon cœur battait. Je n'osais pas bouger. Tout à coup j'eus la certitude absolue qu'un être invisible était là, près de moi, me regardant, me touchant, m'envahissant.\n\nCette nuit encore je m'éveille vers deux heures. Une angoisse atroce me saisit. Et soudain je perçus qu'on lisait dans mon livre, qu'on tournait les feuillets. Mon livre était ouvert alors qu'il ne l'était pas.`},
+        {n:11, text:`16 août. — La Roumanie. Je lis dans une gazette de Bucharest : « Des faits étranges se passent dans plusieurs villages de la province Valachie. Les habitants abandonnent leurs demeures, fuyant, disent-ils, une sorte d'être vampire qui se repaît chaque nuit d'eux, les suce. »\n\nCette lecture me donna le vertige. Ces créatures qui errent dans l'ombre, êtres invisibles dont nous subissons les mystérieuses voisinages… Pourquoi pas ? Je sens maintenant que leur règne commence.`},
+        {n:12, text:`19 août. — Je le sais maintenant. Je l'ai vu !\n\nJ'étais assis à lire, ne songeant à rien ; et je sentis, je fus certain qu'on me lisait par-dessus l'épaule, qu'il était là, frôlant mon oreille. Je me dressai, en me tournant si vite que je faillis tomber. Il faisait clair comme en plein jour, et je ne me vis pas dans ma glace !... Elle était vide, claire, profonde, pleine de lumière ! Mon image n'était pas dedans... et j'étais en face. Je regardais cet objet grand comme moi et je ne me voyais pas.`}
+      ],
+      // Section 3
+      [
+        {n:13, text:`25 août. — Le Horla ! Je viens de le nommer, et en prononçant ce mot je frissonne. Le Horla — oui, c'est lui, le nouveau maître ! Il m'a dit son nom. Et je sus aussitôt qu'il était là. Il est venu. Quelque chose de plus fort que moi l'a prononcé à travers mes lèvres, un nom venu de nulle part, forgé par ce qui me possède et me dévore.\n\nIl me tient, je ne peux plus m'en aller. Je suis prisonnier de cette chose invisible.`},
+        {n:14, text:`Le Horla a maintenant une forme dans mon esprit. Il n'est pas un fantôme, pas un démon des vieilles légendes. C'est quelque chose de nouveau, d'apparu sur terre, quelque être d'une autre nature, une autre race d'êtres, dont le règne commence.\n\nComme l'homme a soumis le cheval et le bœuf, comme nous avons asservi toutes les créatures vivantes, voilà qu'à notre tour quelque chose veut nous faire ses serviteurs. Et nous sommes si faibles, si désarmés, si ignorants, si petits nous autres, sur ce grain de boue.`},
+        {n:15, text:`Nuit du 6 au 7 septembre. — J'ai rêvé que j'étranglais le Horla. Et je me suis réveillé avec mes deux mains crispées sur ma gorge à moi, que j'étranglais moi-même.\n\nJe ne peux plus dormir. Il est là, rôdant, invisible, qui me surveille, qui me pénètre, qui me domine. Je sens son regard sur moi comme un feu. Je cours, il court. Il est partout, dedans moi, dehors. Je ne sais plus qui est lui, qui est moi.`},
+        {n:16, text:`10 septembre. — J'ai brûlé ma maison.\n\nJ'avais barricadé toutes les portes et les fenêtres. J'avais mis du feu aux quatre coins du rez-de-chaussée, et j'attendais sur la route pour voir si le Horla brûlait avec elle.\n\nEt soudain les domestiques vinrent en criant. Deux d'entre eux ont péri. Ils sont morts par moi. Dieu leur pardonne. Mais le Horla était-il mort aussi ? Non, non, j'en suis sûr, il n'est pas mort. Alors... alors... il va donc falloir que je me tue moi aussi.`},
+        {n:17, text:`Il est mort ? Son corps peut-il périr par les moyens qui tuent les corps humains ?\n\nS'il n'est pas mort... il va donc falloir que je me tue, moi !...\n\n— FIN —`}
+      ]
+    ]
+  },
+  en: {
+    bookTitle: 'THE HORLA · GUY DE MAUPASSANT',
+    sidebarTitle: 'Moods',
+    feedbackBtn: 'Feedback',
+    page: 'Page',
+    of: '/',
+    clickToStart: 'Click to start',
+    fbTitle: 'Reading Feedback',
+    fbSub: 'Your answers are private — only Hugo can see them. Please be honest.',
+    fbQ0: 'Your first name (optional)',
+    fbQ1: '1 — Was the overall immersion there?',
+    fbH1: '1 = none · 5 = total',
+    fbQ2: '2 — Did the music match the emotions of the text?',
+    fbQ3: '3 — Did the music distract or bother you?',
+    fbH3: '1 = very often · 5 = never',
+    fbQ4: '4 — Were the musical transitions between moods well-placed?',
+    fbQ5: '5 — Was the volume of the music appropriate?',
+    fbH5: '1 = inappropriate · 5 = perfect',
+    fbQ6: '6 — A moment where the music particularly struck you?',
+    fbQ6ph: 'Describe the moment, the page, the feeling...',
+    fbQ7: '7 — A moment where the music didn\'t fit?',
+    fbQ7ph: 'E.g.: page 5, the music was too intense...',
+    fbQ8: '8 — Your suggestions to improve the experience?',
+    fbQ8ph: 'Any feedback is welcome...',
+    fbQ9: '9 — Would you recommend DeePage to someone who loves reading?',
+    fbH9: '1 = no · 5 = absolutely',
+    fbQ10: '10 — Overall rating for the DeePage concept',
+    fbSubmit: 'Submit feedback',
+    fbCancel: 'Cancel',
+    fbThanks: 'Thank you! Your feedback has been recorded.',
+    resTitle: 'Private Results',
+    resSub: 'Restricted access — Hugo only',
+    resPwdError: 'Incorrect password',
+    resAccess: 'Access',
+    resCancel: 'Cancel',
+    resClose: 'Close',
+    resReceived: 'feedback received',
+    resReceivedP: 'feedbacks received',
+    resNone: 'No feedback yet.',
+    rLabels: ['Overall immersion','Music matching','Not disturbed','Transitions','Volume','Recommendation','Final rating','Positive moment','Negative moment','Suggestions'],
+    sections: [
+      {name:'Chapter 1', emotion:'PEACEFUL'},
+      {name:'Chapter 2', emotion:'TROUBLED'},
+      {name:'Chapter 3', emotion:'MYSTERIOUS'},
+      {name:'Chapter 4', emotion:'TERROR'},
+    ],
+    pages: [
+      [
+        {n:1, text:`May 8. — What a glorious day! I spent the whole morning lying on the grass in front of my house, under the enormous plane tree that covers, shelters, and shades it entirely. I love this land, and I love living here because I have my roots here — those deep, delicate roots that bind a man to the soil where his ancestors were born and died, that bind him to what one thinks and eats, to local customs and foods, to regional expressions, to the inflections of the peasants, to the smells of the earth, the villages, and the air itself.`},
+        {n:2, text:`I love the house where I grew up. From my windows I can see the Seine flowing along my garden, just beyond the road, almost at my doorstep — the great wide Seine, winding from Rouen to Le Havre, covered with passing boats.\n\nTo the left, in the distance, Rouen — the vast city with blue rooftops beneath a forest of pointed Gothic spires. They are countless, slender or broad, dominated by the cast-iron spire of the cathedral, all filled with bells that ring in the blue air of fine mornings, casting their distant, soft iron murmur toward me, their brazen song carried on the breeze, now louder, now muffled, as the wind rises or dies.`},
+        {n:3, text:`How beautiful it was this morning! Around eleven o'clock, a long convoy of ships, towed by a tugboat as small as a fly, groaning with effort and belching thick smoke, filed past my gate.\n\nAfter two English frigates, their red flags rippling in the sky, came a magnificent three-masted Brazilian vessel, pure white, admirably clean and gleaming. I saluted it, I don't know why — the sight of it gave me such pleasure.`}
+      ],
+      [
+        {n:4, text:`May 12. — I have had a slight fever for the past few days; I feel unwell, or rather I feel sad.\n\nWhere do these mysterious influences come from that transform our happiness into discouragement and our confidence into distress? One would think the air — the invisible air — is full of unknowable Powers whose mysterious proximity we endure. I wake up full of joy, with a desire to sing. — Why? — I walk down to the water; and suddenly, after a short stroll, I return home desolate, as if some misfortune were waiting for me there.`},
+        {n:5, text:`May 16. — I am ill, there is no doubt about it. I was so well last month! I have a fever, an atrocious fever, or rather a feverish agitation that makes my soul suffer as much as my body. I have an unceasing horrible feeling of some threatening danger, an apprehension of some coming misfortune or approaching death — a presentiment that is doubtless the onset of some unknown illness germinating in my blood and flesh.\n\nI go upstairs to my room. I double-lock my door — I am afraid... of what?... I feared nothing until now... I open my wardrobes, I look under my bed; I listen... I listen... to what?`},
+        {n:6, text:`Is it not strange that a simple unease, a circulatory disturbance perhaps, the irritation of a nerve fiber, a slight congestion, a tiny perturbation in the so imperfect and delicate workings of our living machine, can make a melancholic out of the most joyful of men, and a coward out of the bravest?\n\nI came home last night after walking all day; and passing before my window, I saw myself in the mirror... I did not recognize myself.`},
+        {n:7, text:`May 25. — No crisis, but something singular happened yesterday.\n\nI had closed all my shutters, all my curtains, to find myself in absolute darkness, and I finally wanted to sleep... Then, through those thick shutters and curtains, a light that seemed to come from nowhere — a vague brightness — passed over me, brushed against me. I jumped up to look and found nothing. All the openings were properly closed. I was troubled, and soon I began to tremble for no reason, a cold that froze me to the bone.`},
+        {n:8, text:`June 6. — I am going mad. The entire contents of my carafe were drunk again last night — or rather, I drank them myself without knowing it.\n\nBut was it me? Was it me? Who else could it be? Who? Oh, my God! Am I going mad? Who will drink tomorrow, if not me?\n\nI had a bottle of good Bordeaux wine brought in, a carafe of milk, bread and strawberries. I touched nothing.\n\nAnd yet the water was drunk and the milk was drunk! Neither the wine nor the strawberries had been touched.`}
+      ],
+      [
+        {n:9, text:`June 10. — I have just conducted some surprising experiments.\n\nI plugged the neck of my carafe with a wad of cotton and covered the glass stopper with muslin, then suspended it above my table.\n\nAnd I slept until seven in the morning.\n\nThe water in my carafe had been drunk! Someone had drunk that water! Who? Certainly me; and yet I truly believed I had not drunk it... and the folds of the muslin had not been disturbed!`},
+        {n:10, text:`July 4. — It has returned; I sensed it last night. But I did not see it. I was sleeping and suddenly woke with a mad terror. My heart was pounding. I dared not move. Why? I don't know. Suddenly I had the absolute certainty that an invisible being was there beside me, watching me, touching me, invading me.\n\nThat night I woke again around two o'clock. An atrocious anguish gripped me. And suddenly I perceived that someone was reading my book, turning its pages. My book was open when it had not been.`},
+        {n:11, text:`August 16. — Romania. I read in a Bucharest gazette: "Strange events are occurring in several villages of the Wallachian province. The inhabitants are abandoning their homes, fleeing, they say, from some sort of vampire creature that feeds on them each night, sucking their blood."\n\nThis reading made me dizzy. These creatures that wander in shadow, invisible beings whose mysterious proximity we endure... Why not? I feel now that their reign is beginning.`},
+        {n:12, text:`August 19. — I know now. I have seen it!\n\nI was sitting reading, thinking of nothing; and I felt, I was certain, that someone was reading over my shoulder, that it was there, brushing against my ear. I leapt to my feet, spinning around so fast I almost fell. The room was as bright as full day — and I could not see myself in the mirror!... It was empty, clear, deep, filled with light! My reflection was not there... and I was standing right in front of it. I stared at this object as large as myself and could not see myself.`}
+      ],
+      [
+        {n:13, text:`August 25. — The Horla! I have named it, and in saying that word I shudder. The Horla — yes, it is him, the new master! It told me its name. And I knew at once that it was there. It has come. Something stronger than myself pronounced it through my lips — a name from nowhere, forged by that which possesses and devours me.\n\nIt holds me; I can no longer leave. I am a prisoner of this invisible thing.`},
+        {n:14, text:`The Horla has now taken shape in my mind. It is not a ghost, not a demon from old legends. It is something new, newly appeared on earth — a being of another nature, another race of beings, whose reign is beginning.\n\nJust as man has subjugated the horse and the ox, just as we have enslaved all living creatures — now in our turn something wants to make us its servants. And we are so weak, so defenseless, so ignorant, so small — we who exist on this grain of mud spinning dissolved in a drop of water.`},
+        {n:15, text:`Night of September 6 to 7. — I dreamed I was strangling the Horla. And I woke with both hands clenched around my own throat, strangling myself.\n\nI can no longer sleep. It is there, prowling, invisible, watching me, penetrating me, dominating me. I feel its gaze upon me like fire. I run; it runs. It is everywhere — inside me, outside me. I no longer know which is it and which is me.`},
+        {n:16, text:`September 10. — I burned my house down.\n\nI had barricaded all the doors and windows. I set fire to all four corners of the ground floor and waited on the road to see whether the Horla would burn with it.\n\nAnd suddenly the servants came running and screaming. Two of them have perished. They died because of me. May God forgive them. But was the Horla also dead? No, no — I am certain it is not dead. So... so... I must kill myself as well.`},
+        {n:17, text:`Is it dead? Can its body perish by the means that kill human bodies?\n\nIf it is not dead... then I must kill myself too!...\n\n— THE END —`}
+      ]
+    ]
+  }
+};
+
+const SECTION_META = [
+  {id:0, color:'#4a7c6b', audio:'Heavenly_Flight.mp3', pages:'1–3'},
+  {id:1, color:'#7a6b4a', audio:'2.mp3', pages:'4–8'},
+  {id:2, color:'#4a5a7a', audio:'3.mp3', pages:'9–12'},
+  {id:3, color:'#7a2a2a', audio:'Tristesse_Poulie.mp3', pages:'13–17'},
+];
+
+// ─── AUDIO ───────────────────────────────────────────────
+function initAudio() {
+  SECTION_META.forEach(s => {
+    const a = new Audio(s.audio);
+    a.loop = false; a.volume = 0; a._fadingOut = false;
+    audioPlayers[s.id] = a;
+    setupLoopFade(a);
+  });
+}
+
+function setupLoopFade(audio) {
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration || audio._fadingOut) return;
+    const rem = audio.duration - audio.currentTime;
+    if (rem < 4 && rem > 0.1 && audio.volume > 0.05) {
+      audio._fadingOut = true;
+      const sv = audio.volume, steps = 40, iv = (rem * 1000) / steps;
+      let s = 0;
+      const t = setInterval(() => {
+        s++; audio.volume = Math.max(0, sv * (1 - s/steps));
+        if (s >= steps) { clearInterval(t); audio.currentTime = 0; audio._fadingOut = false; audio.play().catch(()=>{}); fadeIn(audio, 0.65, 5000); }
+      }, iv);
+    }
+  });
+}
+
+function fadeIn(audio, tv=0.65, ms=3000) {
+  var target = (typeof isMuted!=='undefined'&&isMuted) ? 0 : Math.min(masterVolume, tv);
+  audio.volume = 0;
+  var steps=60, iv=ms/steps, s=0;
+  var t = setInterval(function(){ s++; audio.volume=Math.min(target,target*(s/steps)); if(s>=steps) clearInterval(t); }, iv);
+}
+
+function fadeOut(audio, cb, ms=2000) {
+  const sv=audio.volume, steps=40, iv=ms/steps; let s=0;
+  const t = setInterval(()=>{ s++; audio.volume=Math.max(0,sv*(1-s/steps)); if(s>=steps){ clearInterval(t); audio.pause(); audio.currentTime=0; audio._fadingOut=false; if(cb) cb(); } }, iv);
+}
+
+function playSection(sIdx, restart=false) {
+  const newAudio = audioPlayers[sIdx];
+  const overlay = document.getElementById('transition-overlay');
+  overlay.classList.add('flash');
+  setTimeout(()=>overlay.classList.remove('flash'),1500);
+  const doPlay = () => {
+    if (!newAudio) return;
+    newAudio.currentTime=0; newAudio._fadingOut=false;
+    newAudio.play().catch(()=>{});
+    fadeIn(newAudio,0.65,5000);
+    currentAudio = newAudio;
+    updateNowPlaying(sIdx);
+  };
+  if (currentAudio && currentAudio !== newAudio) fadeOut(currentAudio, doPlay, 2000);
+  else if (!currentAudio) doPlay();
+  else if (restart) fadeOut(currentAudio, doPlay, 1200);
+}
+
+function updateNowPlaying(sIdx) {
+  const meta = SECTION_META[sIdx];
+  const t = T[currentLang];
+  const sec = t.sections[sIdx];
+  document.getElementById('playing-dot').style.display = 'block';
+  document.getElementById('now-playing-text').textContent = sec.name;
+  const badge = document.getElementById('emotion-badge');
+  badge.style.display = 'inline-block';
+  badge.textContent = sec.emotion;
+  badge.style.background = meta.color + '33';
+  badge.style.color = meta.color;
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function buildNav() {
+  const t = T[currentLang];
+  // Sidebar
+  const sb = document.getElementById('sidebar-sections');
+  sb.innerHTML = '';
+  document.getElementById('sidebar-title-text').textContent = t.sidebarTitle;
+  SECTION_META.forEach((meta, i) => {
+    const sec = t.sections[i];
+    const btn = document.createElement('button');
+    btn.className = 'section-btn' + (i===currentSectionIdx?' active':'');
+    btn.id = `sec-btn-${i}`;
+    const isFirst = i === 0;
+    btn.innerHTML = `<div class="section-dot" style="background:${meta.color}"></div><span>${sec.name}</span><span class="section-pages">${meta.pages}</span>${isFirst && !window._ch1Clicked ? '<span class="ch1-arrow">→ Commencer</span>' : ''}`;
+    btn.onclick = () => {
+      window._ch1Clicked = true;
+      // remove arrow from all sidebar buttons
+      document.querySelectorAll('.ch1-arrow').forEach(el => el.remove());
+      const gb = i<currentSectionIdx; renderSection(i,0); playSection(i,gb);
+    };
+    sb.appendChild(btn);
+  });
+  // Mobile tabs
+  const mt = document.getElementById('mobile-tabs-inner');
+  mt.innerHTML = '';
+  SECTION_META.forEach((meta, i) => {
+    const sec = t.sections[i];
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (i===currentSectionIdx?' active':'');
+    btn.id = `tab-btn-${i}`;
+    const isFirstTab = i === 0;
+    btn.innerHTML = `<div class="tab-dot" style="background:${meta.color}"></div>${sec.name}${isFirstTab && !window._ch1Clicked ? ' →' : ''}`;
+    btn.onclick = () => {
+      window._ch1Clicked = true;
+      document.querySelectorAll('.ch1-arrow').forEach(el => el.remove());
+      document.querySelectorAll('.tab-btn').forEach((b,idx) => {
+        if(idx===0) b.innerHTML = `<div class="tab-dot" style="background:${SECTION_META[0].color}"></div>${T[currentLang].sections[0].name}`;
+      });
+      const gb = i<currentSectionIdx; renderSection(i,0); playSection(i,gb);
+    };
+    mt.appendChild(btn);
+  });
+}
+
+function renderSection(sIdx, pIdx) {
+  currentSectionIdx = sIdx; currentPageIdx = pIdx;
+  const t = T[currentLang];
+  const meta = SECTION_META[sIdx];
+  const sec = t.sections[sIdx];
+  const page = t.pages[sIdx][pIdx];
+
+  document.querySelectorAll('.section-btn').forEach((b,i)=>b.classList.toggle('active',i===sIdx));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===sIdx));
+
+  const ta = document.getElementById('text-area');
+  ta.innerHTML = `
+    <div class="section-label">${sec.emotion} · ${sec.name.toUpperCase()}</div>
+    <div class="page-number">${t.page} ${page.n}</div>
+    <div class="page-text">${page.text.replace(/\n/g,'<br><br>')}</div>
+  `;
+  document.getElementById('scroll-area').scrollTop = 0;
+
+  const totalPages = T[currentLang].pages.reduce((a,s)=>a+s.length,0);
+  const globalIdx = T[currentLang].pages.slice(0,sIdx).reduce((a,s)=>a+s.length,0)+pIdx;
+  document.getElementById('progress-fill').style.width = Math.round((globalIdx+1)/totalPages*100)+'%';
+  document.getElementById('page-indicator').textContent = `${t.page} ${page.n} ${t.of} ${totalPages}`;
+  document.getElementById('prev-btn').disabled = sIdx===0 && pIdx===0;
+  document.getElementById('next-btn').disabled = sIdx===SECTION_META.length-1 && pIdx===t.pages[sIdx].length-1;
+  clearEndTimers();
+  if (pIdx === t.pages[sIdx].length - 1) startEndFade();
+}
+
+function navigate(dir) {
+  const t = T[currentLang];
+  let sIdx=currentSectionIdx, pIdx=currentPageIdx+dir;
+  if (pIdx<0){ sIdx--; if(sIdx<0) return; pIdx=t.pages[sIdx].length-1; }
+  else if (pIdx>=t.pages[sIdx].length){ sIdx++; if(sIdx>=SECTION_META.length) return; pIdx=0; }
+  const cm = sIdx!==currentSectionIdx, gb = sIdx<currentSectionIdx;
+  renderSection(sIdx,pIdx);
+  if(cm) playSection(sIdx,gb);
+}
+
+// ─── LANGUAGE ────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-fr').classList.toggle('active', lang==='fr');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  applyTranslations();
+  buildNav();
+  renderSection(currentSectionIdx, currentPageIdx);
+  if (currentAudio) updateNowPlaying(currentSectionIdx);
+}
+
+function applyTranslations() {
+  const t = T[currentLang];
+  document.getElementById('feedback-btn').textContent = t.feedbackBtn;
+  document.getElementById('sidebar-title-text').textContent = t.sidebarTitle;
+  // Feedback modal
+  document.getElementById('fb-title').textContent = t.fbTitle;
+  document.getElementById('fb-sub').textContent = t.fbSub;
+  document.getElementById('fb-q0').textContent = t.fbQ0;
+  document.getElementById('fb-q1').textContent = t.fbQ1;
+  document.getElementById('fb-h1').textContent = t.fbH1;
+  document.getElementById('fb-q2').textContent = t.fbQ2;
+  document.getElementById('fb-q3').textContent = t.fbQ3;
+  document.getElementById('fb-h3').textContent = t.fbH3;
+  document.getElementById('fb-q4').textContent = t.fbQ4;
+  document.getElementById('fb-q5').textContent = t.fbQ5;
+  document.getElementById('fb-h5').textContent = t.fbH5;
+  document.getElementById('fb-q6').textContent = t.fbQ6;
+  document.getElementById('q-text1').placeholder = t.fbQ6ph;
+  document.getElementById('fb-q7').textContent = t.fbQ7;
+  document.getElementById('q-text2').placeholder = t.fbQ7ph;
+  document.getElementById('fb-q8').textContent = t.fbQ8;
+  document.getElementById('q-text3').placeholder = t.fbQ8ph;
+  document.getElementById('fb-q9').textContent = t.fbQ9;
+  document.getElementById('fb-h9').textContent = t.fbH9;
+  document.getElementById('fb-q10').textContent = t.fbQ10;
+  document.getElementById('submit-feedback').textContent = t.fbSubmit;
+  document.getElementById('cancel-feedback').textContent = t.fbCancel;
+  // Results modal
+  document.getElementById('res-title').textContent = t.resTitle;
+  document.getElementById('res-sub').textContent = t.resSub;
+  document.getElementById('pwd-error').textContent = t.resPwdError;
+  document.getElementById('pwd-btn').textContent = t.resAccess;
+  document.getElementById('close-results-btn').textContent = t.resCancel;
+  document.getElementById('close-results-btn2').textContent = t.resClose;
+  document.getElementById('q-name').placeholder = currentLang==='fr' ? 'Ex : Marie' : 'E.g.: John';
+}
+
+// ─── FEEDBACK ────────────────────────────────────────────
+function buildStars(containerId, key) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  for (let i=1;i<=5;i++) {
+    const btn = document.createElement('button');
+    btn.className='star-btn'; btn.textContent='★'; btn.type='button';
+    btn.onclick=()=>{ ratings[key]=i; c.querySelectorAll('.star-btn').forEach((b,idx)=>b.classList.toggle('lit',idx<i)); };
+    c.appendChild(btn);
+  }
+}
+
+function submitFeedback() {
+  const t = T[currentLang];
+  const feedback = {
+    date: new Date().toLocaleString(currentLang==='fr'?'fr-FR':'en-GB'),
+    lang: currentLang,
+    nom: document.getElementById('q-name').value.trim()||'Anonyme',
+    immersion: ratings[1], correspondance: ratings[2], nonGene: ratings[3],
+    transitions: ratings[4], volume: ratings[5], recommande: ratings[6], noteFinale: ratings[7],
+    momentPositif: document.getElementById('q-text1').value.trim(),
+    momentNegatif: document.getElementById('q-text2').value.trim(),
+    suggestions: document.getElementById('q-text3').value.trim(),
+  };
+  allFeedbacks.push(feedback);
+  localStorage.setItem('deepage_feedbacks', JSON.stringify(allFeedbacks));
+  document.getElementById('feedback-modal').classList.remove('open');
+  ratings={1:0,2:0,3:0,4:0,5:0,6:0,7:0};
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('lit'));
+  ['q-name','q-text1','q-text2','q-text3'].forEach(id=>document.getElementById(id).value='');
+  alert(t.fbThanks);
+}
+
+// ─── RESULTS ─────────────────────────────────────────────
+function showResults() {
+  document.getElementById('pwd-box').style.display='flex';
+  document.getElementById('results-content').style.display='none';
+  document.getElementById('pwd-input').value='';
+  document.getElementById('pwd-error').style.display='none';
+  document.getElementById('results-modal').classList.add('open');
+}
+function closeResults() { document.getElementById('results-modal').classList.remove('open'); }
+function checkPassword() {
+  if (document.getElementById('pwd-input').value===ADMIN_PASSWORD) {
+    document.getElementById('pwd-box').style.display='none';
+    document.getElementById('results-content').style.display='block';
+    renderResults();
+  } else { document.getElementById('pwd-error').style.display='block'; }
+}
+function renderResults() {
+  allFeedbacks = JSON.parse(localStorage.getItem('deepage_feedbacks')||'[]');
+  const t = T[currentLang];
+  const n = allFeedbacks.length;
+  document.getElementById('results-count').textContent = n + ' ' + (n>1?t.resReceivedP:t.resReceived);
+  const list = document.getElementById('results-list');
+  list.innerHTML='';
+  if(n===0){ list.innerHTML=`<div class="no-feedback">${t.resNone}</div>`; return; }
+  const stars = v => v ? '★'.repeat(v)+'☆'.repeat(5-v)+` (${v}/5)` : '—';
+  [...allFeedbacks].reverse().forEach(f=>{
+    const card = document.createElement('div');
+    card.className='result-card';
+    const lang_label = f.lang==='en'?' 🇬🇧':' 🇫🇷';
+    card.innerHTML=`
+      <div class="result-meta">${f.nom}${lang_label} — ${f.date}</div>
+      <div class="result-row"><span class="result-q">${t.rLabels[0]}</span><span class="result-a stars-display">${stars(f.immersion)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[1]}</span><span class="result-a stars-display">${stars(f.correspondance)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[2]}</span><span class="result-a stars-display">${stars(f.nonGene)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[3]}</span><span class="result-a stars-display">${stars(f.transitions)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[4]}</span><span class="result-a stars-display">${stars(f.volume)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[5]}</span><span class="result-a stars-display">${stars(f.recommande)}</span></div>
+      <div class="result-row"><span class="result-q">${t.rLabels[6]}</span><span class="result-a stars-display">${stars(f.noteFinale)}</span></div>
+      ${f.momentPositif?`<div class="result-row"><span class="result-q">${t.rLabels[7]}</span><span class="result-a">${f.momentPositif}</span></div>`:''}
+      ${f.momentNegatif?`<div class="result-row"><span class="result-q">${t.rLabels[8]}</span><span class="result-a">${f.momentNegatif}</span></div>`:''}
+      ${f.suggestions?`<div class="result-row"><span class="result-q">${t.rLabels[9]}</span><span class="result-a">${f.suggestions}</span></div>`:''}
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+buildStars('stars-1',1);buildStars('stars-2',2);buildStars('stars-3',3);buildStars('stars-4',4);
+buildStars('stars-5',5);buildStars('stars-6',6);buildStars('stars-7',7);
+applyTranslations();
+buildNav();
+renderSection(0,0);
+initAudio();
+
+document.getElementById('prev-btn').onclick=()=>navigate(-1);
+document.getElementById('next-btn').onclick=()=>navigate(1);
+document.getElementById('feedback-btn').onclick=()=>document.getElementById('feedback-modal').classList.add('open');
+document.getElementById('cancel-feedback').onclick=()=>document.getElementById('feedback-modal').classList.remove('open');
+document.getElementById('submit-feedback').onclick=submitFeedback;
+document.getElementById('pwd-btn').onclick=checkPassword;
+document.getElementById('close-results-btn').onclick=closeResults;
+document.getElementById('close-results-btn2').onclick=closeResults;
+document.getElementById('pwd-input').onkeydown=e=>{if(e.key==='Enter')checkPassword();};
+
+let logoClicks=0;
+document.getElementById('logo-btn').onclick=()=>{
+  logoClicks++; if(logoClicks>=2){logoClicks=0;showResults();}
+  setTimeout(()=>logoClicks=0,500);
+};
+
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space') return;
+  if(e.key==='ArrowUp'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+    e.preventDefault();var sl=document.getElementById('volume-slider');
+    sl.value=Math.min(100,parseInt(sl.value)+5);setMasterVolume(sl.value/100);return;
+  }
+  if(e.key==='ArrowDown'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+    e.preventDefault();var sl=document.getElementById('volume-slider');
+    sl.value=Math.max(0,parseInt(sl.value)-5);setMasterVolume(sl.value/100);return;
+  }
+  const fbO=document.getElementById('feedback-modal').classList.contains('open');
+  const rsO=document.getElementById('results-modal').classList.contains('open');
+  if(!fbO&&!rsO){if(e.key==='ArrowRight')navigate(1);if(e.key==='ArrowLeft')navigate(-1);}
+});
+
+// ─── MUTE ─────────────────────────────────────────────────
+let isMuted = false;
+
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('mute-btn');
+  if (isMuted) {
+    if (currentAudio) { fadeOut(currentAudio, null, 800); }
+    btn.textContent = '🔇';
+    btn.classList.add('muted');
+    btn.title = 'Musique coupée — cliquez ou appuyez sur Espace pour relancer';
+  } else {
+    btn.textContent = '🔊';
+    btn.classList.remove('muted');
+    btn.title = 'Espace pour couper/relancer la musique';
+    if (started) playSection(currentSectionIdx, true);
+  }
+}
+
+document.getElementById('mute-btn').onclick = toggleMute;
+
+document.getElementById('volume-slider').addEventListener('input', function() {
+  setMasterVolume(this.value / 100);
+});
+
+document.addEventListener('keydown', function spaceHandler(e) {
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    toggleMute();
+  }
+});
+
+// audio démarré via closeCover()
+</script>
+</body>
+</html>
